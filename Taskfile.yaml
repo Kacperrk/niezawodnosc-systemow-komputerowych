@@ -53,7 +53,7 @@ tasks:
     deps: [require-uv]
     dir: src/
     cmds:
-      - uv tool run pyinstaller --onefile --windowed --name niezawodnosc main.py
+      - uv tool run pyinstaller --onefile --windowed --name niezawodnosc --add-data "czcionka;czcionka" main.py
 
   update-flake:
     desc: Update flake.lock (requires Nix)

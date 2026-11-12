@@ -1,19 +1,29 @@
 from __future__ import annotations
 
 import re
+import sys
 import tkinter as tk
 from dataclasses import dataclass
-from datetime import datetime
 from pathlib import Path
 from tkinter import messagebox, ttk
+
+from fpdf import FPDF
 
 from niezawodnosc import Wskaźniki, wskaźniki_erlanga, wskaźniki_wykładnicze
 
 WZORZEC_ZMIENNOPRZECINKOWY = re.compile(r"^\d*([.,]\d*)?$")
 WZORZEC_CAŁKOWITY = re.compile(r"^\d*$")
 
-KATALOG_WYNIKÓW = Path(__file__).resolve().parent / "wyniki"
-PLIK_WYNIKÓW = KATALOG_WYNIKÓW / "wyniki_niezawodnosc.txt"
+if getattr(sys, "frozen", False):
+    KATALOG_PROGRAMU = Path(sys.executable).resolve().parent
+else:
+    KATALOG_PROGRAMU = Path(__file__).resolve().parent
+
+PLIK_WYNIKÓW = KATALOG_PROGRAMU / "wynik_niezawodnosc.pdf"
+
+KATALOG_CZCIONEK = Path(getattr(sys, "_MEIPASS", KATALOG_PROGRAMU)) / "czcionka"
+CZCIONKA_REGULAR = KATALOG_CZCIONEK / "LiberationSans-Regular.ttf"
+CZCIONKA_BOLD = KATALOG_CZCIONEK / "LiberationSans-Bold.ttf"
 
 DANE_TESTOWE: list[tuple[str, str, str, str]] = [
     ("Test 1", "10", "0.1", "2"),
@@ -135,7 +145,7 @@ class AplikacjaNiezawodność(ttk.Frame):
         ttk.Button(ramka, text="Oblicz", command=self.oblicz).grid(row=0, column=0, padx=(0, 8))
         self.przycisk_zapisz = ttk.Button(
             ramka,
-            text="Zapisz wynik do pliku wyników",
+            text="Zapisz wynik do druku",
             command=self.zapisz_do_pliku,
             state="disabled",
         )
@@ -208,44 +218,46 @@ class AplikacjaNiezawodność(ttk.Frame):
         if self.ostatni_wynik is None:
             return
 
-        KATALOG_WYNIKÓW.mkdir(parents=True, exist_ok=True)
-        numer_testu = self._następny_numer_testu()
+        self._renderuj_pdf().output(str(PLIK_WYNIKÓW))
 
-        with open(PLIK_WYNIKÓW, "a", encoding="utf-8") as plik:
-            plik.write(self._renderuj_wpis(numer_testu))
+        self.etykieta_status.config(text="Zapisano wynik do PDF")
 
-        self.etykieta_status.config(text=f"Zapisano test nr {numer_testu}")
-
-    @staticmethod
-    def _następny_numer_testu() -> int:
-        if not PLIK_WYNIKÓW.exists():
-            return 1
-        treść = PLIK_WYNIKÓW.read_text(encoding="utf-8")
-        return treść.count("Test nr ") + 1
-
-    def _renderuj_wpis(self, numer_testu: int) -> str:
+    def _renderuj_pdf(self) -> FPDF:
         wynik = self.ostatni_wynik
         assert wynik is not None
 
-        linie = [
-            "=" * 84,
-            f"Test nr {numer_testu} -- {datetime.now():%Y-%m-%d %H:%M:%S}",
-            "Wskaźniki niezawodności obiektów nienaprawialnych",
-            "",
-            "Dane wejściowe:",
-            f"  Chwila czasu t = {wynik.t:g} h",
-            f"  Intensywność uszkodzeń lambda = {wynik.lambda_:g} 1/h",
-            f"  Rząd rozkładu Erlanga r = {wynik.rząd}",
-            "",
-            f"{'Wskaźnik':38}{'Jednostka':10}{'Wykładniczy':18}{'Erlang':18}",
-            "-" * 84,
-        ]
+        pdf = FPDF()
+        pdf.add_font("Liberation", "", str(CZCIONKA_REGULAR))
+        pdf.add_font("Liberation", "B", str(CZCIONKA_BOLD))
+        pdf.add_page()
+        pdf.set_font("Liberation", "B", 14)
+        pdf.cell(0, 10, "Wskaźniki niezawodności obiektów nienaprawialnych", new_x="LMARGIN", new_y="NEXT")
+
+        pdf.set_font("Liberation", "B", 11)
+        pdf.cell(0, 8, "Dane wejściowe:", new_x="LMARGIN", new_y="NEXT")
+        pdf.set_font("Liberation", "", 11)
+        pdf.cell(0, 6, f"Chwila czasu t = {wynik.t:g} h", new_x="LMARGIN", new_y="NEXT")
+        pdf.cell(0, 6, f"Intensywność uszkodzeń λ = {wynik.lambda_:g} 1/h", new_x="LMARGIN", new_y="NEXT")
+        pdf.cell(0, 6, f"Rząd rozkładu Erlanga r = {wynik.rząd}", new_x="LMARGIN", new_y="NEXT")
+        pdf.ln(4)
+
+        szerokości = (80, 20, 40, 40)
+        pdf.set_font("Liberation", "B", 10)
+        for szerokość, nagłówek in zip(szerokości, ("Wskaźnik", "Jedn.", "Wykładniczy", "Erlang")):
+            pdf.cell(szerokość, 7, nagłówek, border=1)
+        pdf.ln()
+
+        pdf.set_font("Liberation", "", 10)
         for etykieta, jednostka, pole in WIERSZE:
             wartość_wykładnicza = formatuj_wartość(getattr(wynik.wykładniczy, pole))
             wartość_erlanga = formatuj_wartość(getattr(wynik.erlanga, pole))
-            linie.append(f"{etykieta:38}{jednostka:10}{wartość_wykładnicza:18}{wartość_erlanga:18}")
+            for szerokość, treść in zip(
+                szerokości, (etykieta, jednostka, wartość_wykładnicza, wartość_erlanga)
+            ):
+                pdf.cell(szerokość, 7, treść, border=1)
+            pdf.ln()
 
-        return "\n".join(linie) + "\n\n"
+        return pdf
 
 
 def main() -> None:

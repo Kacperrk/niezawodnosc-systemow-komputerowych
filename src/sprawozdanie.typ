@@ -133,12 +133,11 @@ suma $r$ niezależnych zmiennych losowych o rozkładzie wykładniczym $lambda$
   zamiast awarii program zgłasza czytelny komunikat o zbyt dużych wartościach.
 + Wyniki są wyświetlane w tabeli (wskaźnik, jednostka, wartość dla rozkładu
   wykładniczego, wartość dla rozkładu Erlanga).
-+ Na żądanie użytkownika (przycisk "Zapisz wynik do pliku wyników") dane
-  wejściowe i wyniki są dopisywane do pliku
-  tekstowego `wyniki_niezawodnosc.txt`. Kolejne
-  obliczenia są w ten sposób gromadzone jedno pod drugim, ponumerowane
-  jako kolejne testy, co pozwala później zebrać wyniki wielu ręcznych
-  testów programu wprost do rozdziału 5 sprawozdania.
++ Na żądanie użytkownika (przycisk "Zapisz wynik do druku") dane
+  wejściowe i wyniki są zapisywane do pliku PDF
+  `wynik_niezawodnosc.pdf`, w tym samym katalogu co program. Każdy zapis
+  zastępuje poprzedni plik, więc plik zawiera tylko wynik ostatniego
+  obliczenia.
 
 = Kod programu
 
@@ -243,14 +242,18 @@ działania programu.
 
   Zamiast wpisywać dane ręcznie, można kliknąć jeden z przycisków *Test 1*,
   *Test 2*, *Test 3* - wklejają one do pól gotowy zestaw danych.
+
+  Jeżeli interesuje nas wyłącznie rozkład wykładniczy, należy w polu *Rząd
+  rozkładu Erlanga r* wpisać `1` - rozkład Erlanga rzędu $r=1$ pokrywa się
+  z rozkładem wykładniczym, więc obie kolumny wyników będą identyczne.
 + Należy kliknąć przycisk *Oblicz*. Wyniki dla obu rozkładów pojawią się
   w tabeli poniżej, wraz z jednostkami.
 + W przypadku błędu (np. wartość ujemna, brak danych) program wyświetli
   okno z komunikatem opisującym, co i w jakich jednostkach należy poprawić.
-+ Aby udokumentować test, należy kliknąć *Zapisz wynik do pliku wyników*.
-  Wpis z danymi wejściowymi i wynikami zostanie dopisany na końcu pliku
-  `wyniki_niezawodnosc.txt`. Kolejne zapisane testy
-  gromadzą się w pliku, ponumerowane po kolei.
++ Aby udokumentować test, należy kliknąć *Zapisz wynik do druku*.
+  W tym samym katalogu co program zostanie utworzony plik
+  `wynik_niezawodnosc.pdf` z danymi wejściowymi i wynikami ostatniego
+  obliczenia. Każdy zapis zastępuje poprzedni plik wynikowy.
 
 = Literatura
 
