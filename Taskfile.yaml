@@ -1,0 +1,64 @@
+version: '3'
+
+tasks:
+  default:
+    silent: true
+    cmds:
+      - '{{.TASK_EXE | shellQuote}} --list --sort none'
+
+  require-uv:
+    internal: true
+    preconditions:
+      - sh: uv --version
+        msg: "uv is required"
+
+  require-typst:
+    internal: true
+    preconditions:
+      - sh: typst --version
+        msg: "typst is required"
+
+  setup-uv:
+    desc: Install dependencies
+    deps: [require-uv]
+    cmds:
+      - uv sync
+
+  run:
+    desc: Run
+    deps: [require-uv]
+    dir: src/
+    cmds:
+      - uv run main.py
+
+  typst:
+    desc: Compile the Typst report
+    deps: [require-typst]
+    dir: src/
+    cmds:
+      - typst compile sprawozdanie.typ
+
+  all:
+    desc: Run the program and compile the report
+    cmds:
+      - task: run
+      - task: typst
+
+  build-exe:
+    desc: >
+      Build a standalone executable with PyInstaller. PyInstaller never
+      cross-compiles -- it only ever builds for the OS it runs on, so this
+      must be run ON WINDOWS to produce a real .exe. Running it on Linux/macOS
+      builds a native binary for that OS instead, not a Windows .exe.
+    deps: [require-uv]
+    dir: src/
+    cmds:
+      - uv tool run pyinstaller --onefile --windowed --name niezawodnosc main.py
+
+  update-flake:
+    desc: Update flake.lock (requires Nix)
+    preconditions:
+      - sh: command -v nix
+        msg: "Nix is not installed, this task is only for Nix users"
+    cmds:
+      - nix flake update

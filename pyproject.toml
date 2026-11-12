@@ -1,0 +1,9 @@
+[project]
+name = "niezawodnosc-lab"
+version = "1.0.0"
+description = "Reliability indicator calculator for non-repairable devices (exponential and Erlang distributions)"
+requires-python = ">=3.11"
+dependencies = []
+
+[tool.uv]
+package = false

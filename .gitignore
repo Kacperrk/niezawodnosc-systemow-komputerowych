@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.py[cod]
+.direnv/
+output/
+src/*.pdf
+src/build/
+src/dist/
+src/*.spec
+src/wyniki/
+obrona/*.pdf
