@@ -255,6 +255,23 @@ działania programu.
   `wynik_niezawodnosc.pdf` z danymi wejściowymi i wynikami ostatniego
   obliczenia. Każdy zapis zastępuje poprzedni plik wynikowy.
 
+= Zrzuty ekranu działania programu
+
+#figure(
+  image("assets/okno-programu.png", width: 90%),
+  caption: [Okno programu bezpośrednio po uruchomieniu, przed wprowadzeniem danych.],
+)
+
+#figure(
+  image("assets/wykonane-obliczenia.png", width: 90%),
+  caption: [Okno programu po wprowadzeniu danych testowych i kliknięciu przycisku "Oblicz".],
+)
+
+#figure(
+  image("assets/wynik-do-druku.png", width: 90%),
+  caption: [Plik PDF `wynik_niezawodnosc.pdf` wygenerowany po kliknięciu przycisku "Zapisz wynik do druku".],
+)
+
 = Literatura
 
 + _Niezawodność urządzeń elektronicznych._ Pr. zb. pod red. M. Prażewskiej,
